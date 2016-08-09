@@ -1,0 +1,59 @@
+inherit qt4-cmake qt5
+
+NAME="qtkeychain"
+VERSION=0.7.0
+RELEASE=1
+CATEGORY="Libs"
+SUMMARY="Qt secret service library"
+DESCRIPTION="QtKeychain is a Qt API to store passwords and other secret data
+securely using methods native to each platform."
+HOMEPAGE="https://github.com/frankosterfeld/qtkeychain"
+SRC_URI="${HOMEPAGE}/archive/v${VERSION}/qtkeychain-v${VERSION}.tar.gz"
+
+PKG_NAMES="libqtkeychain1 libqtkeychain-devel libqt5keychain1 libqt5keychain-devel"
+libqtkeychain1_REQUIRES="gnome-keyring"
+libqtkeychain1_CONTENTS="
+	usr/bin/cygqtkeychain-1.dll
+	usr/share/doc/qtkeychain/
+	${QT4_DATADIR#/}/translations/qtkeychain_*
+"
+libqt5keychain1_REQUIRES="gnome-keyring"
+libqt5keychain1_CONTENTS="
+	usr/bin/cygqt5keychain-1.dll
+	usr/share/doc/qt5keychain/
+	${QT5_DATADIR#/}/translations/qtkeychain_*
+"
+libqtkeychain_devel_CONTENTS="
+	usr/include/qtkeychain/
+	usr/lib/cmake/QtKeychain/
+	usr/lib/libqtkeychain.dll.a
+"
+libqt5keychain_devel_CONTENTS="
+	usr/include/qt5keychain/
+	usr/lib/cmake/Qt5Keychain/
+	usr/lib/libqt5keychain.dll.a
+"
+
+DIFF_EXCLUDES="*.ts"
+
+src_compile() {
+	mkdir -p ${B}/qt4
+	cd ${B}/qt4
+	qt4_cmake_compile -DBUILD_WITH_QT4:BOOL=ON
+
+	mkdir -p ${B}/qt5
+	cd ${B}/qt5
+	cygcmake
+	cygmake
+}
+
+src_install() {
+	cd ${B}/qt4
+	cyginstall
+
+	cd ${B}/qt5
+	cyginstall
+
+	docinto /qt5keychain
+	dodoc ${S}/{ChangeLog,COPYING,README.txt}
+}
